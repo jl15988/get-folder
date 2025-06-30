@@ -1,0 +1,6 @@
+D:\developer\NpmProjects\brisk-folder-size\packages\cc\src\main.cpp;D:\developer\NpmProjects\brisk-folder-size\packages\cc\build\Release\obj\brisk_folder_size_native\src\main.obj
+D:\developer\NpmProjects\brisk-folder-size\packages\cc\src\common\filesystem_common.cpp;D:\developer\NpmProjects\brisk-folder-size\packages\cc\build\Release\obj\brisk_folder_size_native\src\common\filesystem_common.obj
+D:\developer\NpmProjects\brisk-folder-size\packages\cc\src\windows\mft_accelerator.cpp;D:\developer\NpmProjects\brisk-folder-size\packages\cc\build\Release\obj\brisk_folder_size_native\src\windows\mft_accelerator.obj
+D:\developer\NpmProjects\brisk-folder-size\packages\cc\src\linux\syscall_accelerator.cpp;D:\developer\NpmProjects\brisk-folder-size\packages\cc\build\Release\obj\brisk_folder_size_native\src\linux\syscall_accelerator.obj
+D:\developer\NpmProjects\brisk-folder-size\packages\cc\src\macos\syscall_accelerator.cpp;D:\developer\NpmProjects\brisk-folder-size\packages\cc\build\Release\obj\brisk_folder_size_native\src\macos\syscall_accelerator.obj
+D:\developer\NpmProjects\brisk-folder-size\node_modules\.pnpm\node-gyp@10.3.1\node_modules\node-gyp\src\win_delay_load_hook.cc;D:\developer\NpmProjects\brisk-folder-size\packages\cc\build\Release\obj\brisk_folder_size_native\win_delay_load_hook.obj

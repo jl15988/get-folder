@@ -1,0 +1,22 @@
+{
+  "description": "A Vite plugin for automatically compressing specified directories into zip archives after build.",
+  "packageManager": "pnpm@10.12.1",
+  "scripts": {
+    "build": "pnpm -r --filter=./packages/core run build",
+    "build:cc": "pnpm -r --filter=./packages/cc run build",
+    "test:cc": "pnpm -r --filter=./packages/play run test:cc",
+    "release": "pnpm -r --filter=./packages/core run release",
+    "build:play": "pnpm -r --filter=./packages/play run build",
+    "test:build": "pnpm run build && pnpm run build:play"
+  },
+  "author": "jl15988",
+  "license": "MIT",
+  "devDependencies": {
+    "@rollup/plugin-terser": "^0.4.4",
+    "@types/node": "^22.15.18",
+    "rollup": "^4.25.0",
+    "rollup-plugin-typescript2": "^0.36.0",
+    "ts-loader": "^9.5.1",
+    "typescript": "^5.6.3"
+  }
+}

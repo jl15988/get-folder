@@ -1,0 +1,15 @@
+{
+  "name": "@brisk-folder-size/play",
+  "version": "0.1.0",
+  "scripts": {
+    "test:cc": "node ./basic.js"
+  },
+  "author": "jl15988",
+  "license": "MIT",
+  "dependencies": {
+    "@brisk-folder-size/cc": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0"
+  }
+}

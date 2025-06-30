@@ -1,0 +1,62 @@
+{
+  "name": "@brisk-folder-size/cc",
+  "version": "0.1.0",
+  "description": "C++ 系统级加速扩展，用于快速文件系统操作",
+  "main": "index.js",
+  "types": "index.d.ts",
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "scripts": {
+    "build": "node-gyp rebuild",
+    "build:debug": "node-gyp rebuild --debug",
+    "clean": "node-gyp clean",
+    "configure": "node-gyp configure",
+    "install": "node-gyp rebuild",
+    "test": "node test/basic.js",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "filesystem",
+    "folder-size",
+    "native",
+    "c++",
+    "accelerator",
+    "performance",
+    "mft",
+    "syscall",
+    "windows",
+    "linux",
+    "macos"
+  ],
+  "author": "jl15988",
+  "license": "MIT",
+  "dependencies": {
+    "node-addon-api": "^7.1.0",
+    "bindings": "^1.5.0"
+  },
+  "devDependencies": {
+    "node-gyp": "^10.0.0",
+    "@types/node": "^20.0.0"
+  },
+  "peerDependencies": {
+    "brisk-folder-size": "workspace:*"
+  },
+  "gypfile": true,
+  "files": [
+    "binding.gyp",
+    "src/**/*",
+    "index.js",
+    "index.d.ts",
+    "test/"
+  ],
+  "os": [
+    "win32",
+    "linux",
+    "darwin"
+  ],
+  "cpu": [
+    "x64",
+    "arm64"
+  ]
+}
