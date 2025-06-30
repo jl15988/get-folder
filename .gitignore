@@ -19,6 +19,7 @@ node_modules/
 
 # 构建输出
 dist/
+packages/cc/build/
 
 # 日志文件
 *.log
