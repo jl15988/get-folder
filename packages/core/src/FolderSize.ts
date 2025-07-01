@@ -7,7 +7,6 @@ import {SimpleSemaphore} from "./SimpleSemaphore";
 
 /**
  * 文件夹大小计算器类
- * 提供高效的文件夹大小计算功能，支持系统级加速
  */
 export class FolderSize {
   private readonly options: Required<FolderSizeOptions>;
@@ -62,7 +61,7 @@ export class FolderSize {
   }
 
   /**
-   * 使用 Node.js 原生 API 计算文件夹大小
+   * 计算文件夹大小
    * @param folderPath 文件夹路径
    * @returns 计算结果
    */

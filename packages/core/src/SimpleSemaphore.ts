@@ -11,10 +11,14 @@
  * 避免文件句柄耗尽、内存占用过高等问题
  */
 export class SimpleSemaphore {
-  /** 当前可用的令牌数量 */
+  /**
+   * 当前可用的令牌数量
+   */
   private available: number;
 
-  /** 等待队列：存储等待令牌的 resolve 函数 */
+  /**
+   * 等待队列：存储等待令牌的 resolve 函数
+   */
   private waiters: Array<() => void> = [];
 
   /**
