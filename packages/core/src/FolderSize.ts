@@ -36,7 +36,6 @@ export class FolderSize {
    */
   constructor(options: FolderSizeOptions = {}) {
     this.options = {
-      followSymlinks: true,
       maxDepth: Number.MAX_SAFE_INTEGER,
       ignorePatterns: [],
       includeHidden: true,
@@ -89,6 +88,7 @@ export class FolderSize {
     let totalSize = new BigNumber(0);
     let fileCount = 0;
     let directoryCount = 0;
+    let linkCount = 0;
 
     /**
      * 递归处理文件夹项目
@@ -109,9 +109,7 @@ export class FolderSize {
       let stats;
       try {
         // 获取文件统计信息
-        stats = this.options.followSymlinks
-          ? await fs.stat(itemPath, {bigint: true})
-          : await fs.lstat(itemPath, {bigint: true});
+        stats = await fs.lstat(itemPath, {bigint: true});
       } catch (error) {
         return this.handleError(error as Error, `无法获取文件信息: ${(error as Error).message}`, itemPath);
       }
@@ -125,6 +123,10 @@ export class FolderSize {
 
       // 累加文件大小
       totalSize = totalSize.plus(stats.size.toString());
+
+      if (stats.isSymbolicLink()) {
+        linkCount++;
+      }
 
       if (stats.isDirectory()) {
         if (itemPath !== folderPath) {
@@ -164,7 +166,8 @@ export class FolderSize {
     return {
       size: totalSize,
       fileCount,
-      directoryCount
+      directoryCount,
+      linkCount
     };
   }
 

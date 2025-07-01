@@ -25,8 +25,6 @@ export type ErrorCallback = (error: FolderSizeError) => boolean;
  * 大小计算选项接口
  */
 export interface FolderSizeOptions {
-  /** 是否跟随符号链接 */
-  followSymlinks?: boolean;
   /** 最大深度限制 */
   maxDepth?: number;
   /** 忽略的文件/目录模式 */
@@ -53,4 +51,6 @@ export interface FolderSizeResult {
   fileCount: number;
   /** 目录数量 */
   directoryCount: number;
+  /** 连接数量 */
+  linkCount: number;
 }
