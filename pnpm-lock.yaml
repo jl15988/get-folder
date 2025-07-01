@@ -64,9 +64,6 @@ importers:
       get-folder:
         specifier: workspace:*
         version: link:../core
-      get-folder-size:
-        specifier: ^5.0.0
-        version: 5.0.0
     devDependencies:
       '@types/node':
         specifier: ^20.0.0
@@ -529,11 +526,6 @@ packages:
     resolution: {integrity: sha512-5xoDfX+fL7faATnagmWPpbFtwh/R77WmMMqqHGS65C3vvB0YHrgF+B1YmZ3441tMj5n63k0212XNoJwzlhffQw==}
     engines: {node: ^8.16.0 || ^10.6.0 || >=11.0.0}
     os: [darwin]
-
-  get-folder-size@5.0.0:
-    resolution: {integrity: sha512-+fgtvbL83tSDypEK+T411GDBQVQtxv+qtQgbV+HVa/TYubqDhNd5ghH/D6cOHY9iC5/88GtOZB7WI8PXy2A3bg==}
-    engines: {node: '>=18.11.0'}
-    hasBin: true
 
   glob-to-regexp@0.4.1:
     resolution: {integrity: sha512-lkX1HJXwyMcprw/5YUZc2s7DrpAiHB21/V+E1rHUrVNokkvB6bqMzT0VfV6/86ZNabt1k14YOIaT7nDvOX3Iiw==}
@@ -1413,8 +1405,6 @@ snapshots:
 
   fsevents@2.3.3:
     optional: true
-
-  get-folder-size@5.0.0: {}
 
   glob-to-regexp@0.4.1: {}
 
