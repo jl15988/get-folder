@@ -1,5 +1,5 @@
 {
-  "name": "@brisk-folder-size/cc",
+  "name": "@get-folder/cc",
   "version": "0.1.0",
   "description": "C++ 系统级加速扩展，用于快速文件系统操作",
   "main": "index.js",
@@ -40,7 +40,7 @@
     "@types/node": "^20.0.0"
   },
   "peerDependencies": {
-    "brisk-folder-size": "workspace:*"
+    "get-folder": "workspace:*"
   },
   "gypfile": true,
   "files": [

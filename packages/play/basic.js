@@ -1,4 +1,4 @@
-const { createAccelerator, isNativeAccelerationSupported, getPlatform } = require('@brisk-folder-size/cc');
+const { createAccelerator, isNativeAccelerationSupported, getPlatform } = require('@get-folder/cc');
 const os = require('os');
 
 async function runBasicTests() {

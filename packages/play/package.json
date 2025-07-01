@@ -2,12 +2,14 @@
   "name": "@brisk-folder-size/play",
   "version": "0.1.0",
   "scripts": {
-    "test:cc": "node ./basic.js"
+    "test:cc": "node ./basic.js",
+    "test:fds": "node ./folder-size.js"
   },
   "author": "jl15988",
   "license": "MIT",
   "dependencies": {
-    "@brisk-folder-size/cc": "workspace:*"
+    "@get-folder/cc": "workspace:*",
+    "get-folder": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^20.0.0"

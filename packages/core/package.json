@@ -1,8 +1,8 @@
 {
-  "name": "brisk-folder-size",
+  "name": "get-folder",
   "private": false,
   "version": "0.1.0-alpha.1",
-  "description": "A Vite plugin for automatically compressing specified directories into zip archives after build.",
+  "description": "Folder retrieval tool.",
   "main": "./dist/index.js",
   "common": "./dist/index.js",
   "module": "./dist/index.mjs",
@@ -26,21 +26,20 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://gitee.com/jl15988/brisk-folder-size"
+    "url": "https://gitee.com/jl15988/get-folder"
   },
   "keywords": [
+    "get-folder",
+    "folder",
+    "folder-size",
+    "get-folder-size"
   ],
   "author": "jl15988",
   "license": "MIT",
   "dependencies": {
-    "archiver": "^7.0.1",
-    "fast-glob": "^3.3.2",
-    "fs-extra": "^11.2.0"
+    "bignumber.js": "^9.3.0"
   },
   "devDependencies": {
-    "@types/archiver": "^6.0.2",
-    "@types/fs-extra": "^11.0.4",
-    "vite": "^5.0.0",
     "@types/node": "^22.15.18"
   }
 }
