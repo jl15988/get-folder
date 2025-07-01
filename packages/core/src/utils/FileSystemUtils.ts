@@ -1,3 +1,5 @@
+import {BigNumber} from 'bignumber.js';
+
 /**
  * 文件系统工具类
  * 提供常用的文件系统操作辅助功能
@@ -9,18 +11,39 @@ export class FileSystemUtils {
    * @param decimals 小数位数
    * @returns 格式化后的大小字符串
    */
-  static formatFileSize(bytes: number | bigint, decimals: number = 2): string {
-    const size = typeof bytes === 'bigint' ? Number(bytes) : bytes;
+  static formatFileSize(bytes?: string | BigNumber, decimals: number = 2): string {
+    if (!bytes) {
+      return '0 Bytes';
+    }
+    if (typeof bytes === 'string') {
+      if (bytes.length === 0 || bytes.trim().length === 0) {
+        return '0 Bytes';
+      }
+    }
 
-    if (size === 0) return '0 Bytes';
+    const size = new BigNumber(bytes);
 
-    const k = 1024;
+    // 如果大小为0，直接返回
+    if (size.isZero()) {
+      return '0 Bytes';
+    }
+
+    const k = new BigNumber(1024);
     const dm = decimals < 0 ? 0 : decimals;
     const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
 
-    const i = Math.floor(Math.log(size) / Math.log(k));
+    // 计算单位级别
+    let i = 0;
+    let tempSize = size;
+    while (tempSize.gte(k) && i < sizes.length - 1) {
+      tempSize = tempSize.div(k);
+      i++;
+    }
 
-    return parseFloat((size / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+    // 计算最终结果
+    const result = size.div(k.pow(i));
+
+    return result.toFixed(dm) + ' ' + sizes[i];
   }
 
   /**
@@ -58,4 +81,4 @@ export class FileSystemUtils {
 
     return !dangerousPatterns.some(pattern => pattern.test(path));
   }
-} 
+}

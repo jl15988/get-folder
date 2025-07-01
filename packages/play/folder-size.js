@@ -1,10 +1,11 @@
-const {FolderSize} = require('get-folder')
+const {FolderSize, FileSystemUtils} = require('get-folder')
 const {getFolderSize} = require('./get-folder-size');
 
 async function folderSize() {
   const sta = Date.now()
-  await FolderSize.getSize('D:\\developer\\GitProjects\\get-folder').then(result => {
+  await FolderSize.getSize('D:\\developers\\GitProjects\\get-folder\\packages').then(result => {
     console.log(result.size.toString());
+    console.log(FileSystemUtils.formatFileSize(result.size));
     console.log(result);
     console.log((Date.now() - sta) / 1000);
   });
