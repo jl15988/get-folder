@@ -3,7 +3,9 @@
   "version": "0.1.0",
   "scripts": {
     "test:cc": "node ./basic.js",
-    "test:fds": "node ./folder-size.js"
+    "test:fds": "node ./folder-size.js",
+    "test:compare": "node ./get-folder-size-comparison.js",
+    "test:compare:gc": "node --expose-gc ./get-folder-size-comparison.js"
   },
   "author": "jl15988",
   "license": "MIT",

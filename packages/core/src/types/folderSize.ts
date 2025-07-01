@@ -1,6 +1,27 @@
 import {BigNumber} from "bignumber.js";
 
 /**
+ * 错误信息接口
+ */
+export interface FolderSizeError {
+  /**
+   * 错误对象
+   */
+  error: Error;
+  /** 错误消息 */
+  message: string;
+  /** 发生错误的路径 */
+  path: string;
+}
+
+/**
+ * 错误处理回调函数类型
+ * @param error 错误信息
+ * @returns 是否继续计算，true=继续，false=停止
+ */
+export type ErrorCallback = (error: FolderSizeError) => boolean;
+
+/**
  * 大小计算选项接口
  */
 export interface FolderSizeOptions {
@@ -16,6 +37,10 @@ export interface FolderSizeOptions {
   fast?: boolean;
   /** 并发限制 */
   concurrency?: number;
+  /** 是否忽略错误继续计算 */
+  ignoreErrors?: boolean;
+  /** 错误处理回调 */
+  onError?: ErrorCallback;
 }
 
 /**
