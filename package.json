@@ -1,5 +1,5 @@
 {
-  "description": "A Vite plugin for automatically compressing specified directories into zip archives after build.",
+  "description": "Folder retrieval tool.",
   "packageManager": "pnpm@10.12.1",
   "scripts": {
     "build": "pnpm -r --filter=./packages/core run build",

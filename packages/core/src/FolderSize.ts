@@ -1,6 +1,6 @@
 import {promises as fs} from 'fs';
 import {join} from 'path';
-import {FolderSizeOptions, FolderSizeResult} from '../types';
+import {FolderSizeOptions, FolderSizeResult} from './types';
 import {BigNumber} from "bignumber.js";
 import * as path from "node:path";
 
@@ -10,7 +10,7 @@ import * as path from "node:path";
  */
 export class FolderSize {
   private readonly options: Required<FolderSizeOptions>;
-  private readonly processedInodes = new Set<number>();
+  private readonly processedInodes = new Set<string>();
 
   /**
    * 快捷获取文件夹大小
@@ -108,43 +108,48 @@ export class FolderSize {
         return;
       }
 
-      // 获取文件统计信息
-      const stats = this.options.followSymlinks
-        ? await fs.stat(itemPath, {bigint: true})
-        : await fs.lstat(itemPath, {bigint: true});
+      try {
+        // 获取文件统计信息
+        const stats = this.options.followSymlinks
+          ? await fs.stat(itemPath, {bigint: true})
+          : await fs.lstat(itemPath, {bigint: true});
 
-      // 检查是否已处理过此 inode（避免硬链接重复计算）
-      const inode = Number(stats.ino);
-      if (this.processedInodes.has(inode)) {
-        return;
-      }
-      this.processedInodes.add(inode);
-
-      // 累加文件大小
-      totalSize = totalSize.plus(stats.size);
-
-      if (stats.isDirectory()) {
-        if (itemPath !== folderPath) {
-          // 排除当前文件夹
-          directoryCount++;
+        // 检查是否已处理过此 inode（避免硬链接重复计算）
+        const inodeKey = `${stats.dev}-${stats.ino}`;
+        if (this.processedInodes.has(inodeKey)) {
+          return;
         }
+        this.processedInodes.add(inodeKey);
 
-        // 读取目录内容并递归处理
-        const entries = await fs.readdir(itemPath);
+        // 累加文件大小
+        totalSize = totalSize.plus(stats.size.toString());
 
-        // 并发处理子项目
-        const semaphore = new Semaphore(this.options.concurrency);
-        const promises = entries.map(async (entry) => {
-          await semaphore.acquire();
-          const childPath = join(itemPath, entry);
-          await processItem(childPath, depth + 1);
-          semaphore.release();
-        });
+        if (stats.isDirectory()) {
+          if (itemPath !== folderPath) {
+            // 排除当前文件夹
+            directoryCount++;
+          }
 
-        await Promise.all(promises);
+          // 读取目录内容并递归处理
+          const entries = await fs.readdir(itemPath);
 
-      } else if (stats.isFile()) {
-        fileCount++;
+          // 简化的并发控制
+          const semaphore = new SimpleSemaphore(this.options.concurrency);
+          await Promise.all(entries.map(async (entry) => {
+            await semaphore.acquire();
+            try {
+              const childPath = join(itemPath, entry);
+              await processItem(childPath, depth + 1);
+            } finally {
+              semaphore.release();
+            }
+          }));
+
+        } else if (stats.isFile()) {
+          fileCount++;
+        }
+      } catch (error) {
+        // 跳过无法访问的文件/目录
       }
     };
 
@@ -175,31 +180,30 @@ export class FolderSize {
 }
 
 /**
- * 信号量类，用于控制并发数量
+ * 简化的信号量类，用于控制并发数量
  */
-class Semaphore {
-  private readonly maxConcurrency: number;
-  private currentConcurrency = 0;
-  private readonly waitingQueue: Array<() => void> = [];
+class SimpleSemaphore {
+  private available: number;
+  private waiters: Array<() => void> = [];
 
-  constructor(maxConcurrency: number) {
-    this.maxConcurrency = maxConcurrency;
+  constructor(concurrency: number) {
+    this.available = concurrency;
   }
 
   /**
    * 获取信号量
    */
   async acquire(): Promise<void> {
+    if (this.available > 0) {
+      this.available--;
+      return;
+    }
+
     return new Promise<void>((resolve) => {
-      if (this.currentConcurrency < this.maxConcurrency) {
-        this.currentConcurrency++;
+      this.waiters.push(() => {
+        this.available--;
         resolve();
-      } else {
-        this.waitingQueue.push(() => {
-          this.currentConcurrency++;
-          resolve();
-        });
-      }
+      });
     });
   }
 
@@ -207,10 +211,11 @@ class Semaphore {
    * 释放信号量
    */
   release(): void {
-    this.currentConcurrency--;
-    const next = this.waitingQueue.shift();
-    if (next) {
-      next();
+    if (this.waiters.length > 0) {
+      const resolve = this.waiters.shift()!;
+      resolve();
+    } else {
+      this.available++;
     }
   }
 } 
