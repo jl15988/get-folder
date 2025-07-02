@@ -50,6 +50,10 @@ export interface FolderSizeOptions {
    */
   ignoreErrors?: boolean;
   /**
+   * 是否硬链接检测
+   */
+  inodeCheck?: boolean;
+  /**
    * 错误处理回调
    */
   onError?: ErrorCallback;

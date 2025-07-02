@@ -41,6 +41,7 @@ export class FolderSize {
       includeHidden: true,
       concurrency: 20,
       ignoreErrors: false,
+      inodeCheck: true,
       // 默认继续
       onError: () => true,
       ...options
@@ -95,12 +96,14 @@ export class FolderSize {
         return this.handleError(error as Error, `无法获取文件信息: ${(error as Error).message}`, itemPath);
       }
 
-      // 检查是否已处理过此 inode（避免硬链接重复计算）
-      const inodeKey = `${stats.dev}-${stats.ino}`;
-      if (this.processedInodes.has(inodeKey)) {
-        return;
+      if (this.options.inodeCheck) {
+        // 检查是否已处理过此 inode（避免硬链接重复计算）
+        const inodeKey = `${stats.dev}-${stats.ino}`;
+        if (this.processedInodes.has(inodeKey)) {
+          return;
+        }
+        this.processedInodes.add(inodeKey);
       }
-      this.processedInodes.add(inodeKey);
 
       // 累加文件大小
       totalSize = totalSize.plus(stats.size.toString());
