@@ -56,6 +56,10 @@ CalculationOptions parseCalculationOptions(const Napi::Object& obj) {
         options.inode_check = obj.Get("inodeCheck").As<Napi::Boolean>().Value();
     }
     
+    if (obj.Has("includeLink") && obj.Get("includeLink").IsBoolean()) {
+        options.include_link = obj.Get("includeLink").As<Napi::Boolean>().Value();
+    }
+    
     return options;
 }
 

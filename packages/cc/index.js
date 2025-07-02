@@ -34,6 +34,7 @@ class NativeAccelerator {
    * @param {number} [options.maxDepth=Infinity] 最大深度
    * @param {string[]} [options.ignorePatterns=[]] 忽略模式
    * @param {boolean} [options.inodeCheck=false] 是否启用硬链接检测，关闭将大幅度提升效率
+   * @param {boolean} [options.includeLink=true] 是否包含符号链接大小
    * @returns {Object} 计算结果
    */
   calculateFolderSize(path, options = {}) {
@@ -46,7 +47,8 @@ class NativeAccelerator {
       includeHidden: true,
       maxDepth: 4294967295, // UINT32_MAX
       ignorePatterns: [],
-      inodeCheck: false
+      inodeCheck: false,
+      includeLink: true
     };
 
     const mergedOptions = { ...defaultOptions, ...options };

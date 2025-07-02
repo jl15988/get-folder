@@ -81,8 +81,9 @@ struct CalculationOptions {
     uint32_t max_depth;                     // 最大深度
     std::vector<std::string> ignore_patterns; // 忽略模式
     bool inode_check;                       // 是否启用硬链接检测
+    bool include_link;                      // 是否包含符号链接大小
     
-    CalculationOptions() : include_hidden(true), max_depth(UINT32_MAX), inode_check(true) {}
+    CalculationOptions() : include_hidden(true), max_depth(UINT32_MAX), inode_check(true), include_link(true) {}
 };
 
 /**

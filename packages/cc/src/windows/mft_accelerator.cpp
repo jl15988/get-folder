@@ -5,6 +5,8 @@
 #include <iostream>
 #include <memory>
 #include <cstdio>
+#include <string>
+#include <unordered_set>
 
 namespace brisk {
 namespace filesystem {
@@ -155,14 +157,23 @@ void WindowsAccelerator::calculateDirectorySizeRecursive(
             }
         }
         
-        // 获取文件大小
-        uint64_t file_size = (static_cast<uint64_t>(find_data.nFileSizeHigh) << 32) | 
-                           find_data.nFileSizeLow;
-        result.total_size += file_size;
+        if (is_symlink) {
+            // 符号链接：统计数量，根据 include_link 配置决定是否计入大小
+            result.link_count++;
+            if (options.include_link) {
+                // 只有在需要计入大小时才调用 getSymlinkSize（性能优化）
+                uint64_t symlink_size = getSymlinkSize(item_path);
+                result.total_size += symlink_size;
+            }
+        } else {
+            // 普通文件和目录：获取大小并计入总大小
+            uint64_t file_size = (static_cast<uint64_t>(find_data.nFileSizeHigh) << 32) | 
+                                find_data.nFileSizeLow;
+            result.total_size += file_size;
+        }
         
         if (is_symlink) {
-            // 符号链接：只统计链接本身的大小，不跟随内容
-            result.link_count++;
+            // 符号链接：已在上面处理
         } else if (is_directory) {
             // 处理目录：统计所有子目录
             result.directory_count++;
@@ -226,7 +237,146 @@ std::string WindowsAccelerator::getFileInodeId(const std::string& path) {
     sprintf_s(inode_id, sizeof(inode_id), "%08X-%016llX", 
               file_info.dwVolumeSerialNumber, file_index);
     
-    return std::string(inode_id);
+        return std::string(inode_id);
+}
+
+uint64_t WindowsAccelerator::getSymlinkSize(const std::string& path) {
+    // 遵循 Node.js 标准：返回符号链接目标路径的 UTF-8 字节长度
+    // 而不是文件的实际磁盘大小
+    
+    // 将路径转换为宽字符
+    int wlen = MultiByteToWideChar(CP_UTF8, 0, path.c_str(), -1, nullptr, 0);
+    if (wlen <= 0) {
+        return 0;
+    }
+    
+    std::wstring wpath(wlen, L'\0');
+    MultiByteToWideChar(CP_UTF8, 0, path.c_str(), -1, &wpath[0], wlen);
+    wpath.resize(wlen - 1); // 移除尾部的 null 字符
+    
+    HANDLE file_handle = CreateFileW(
+        wpath.c_str(),
+        FILE_READ_ATTRIBUTES,
+        FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE,
+        NULL,
+        OPEN_EXISTING,
+        FILE_FLAG_BACKUP_SEMANTICS | FILE_FLAG_OPEN_REPARSE_POINT,  // 支持重解析点
+        NULL
+    );
+    
+    if (file_handle == INVALID_HANDLE_VALUE) {
+        return 0;
+    }
+    
+    // 读取重解析点数据
+    char buffer[16384];  // MAXIMUM_REPARSE_DATA_BUFFER_SIZE
+    REPARSE_DATA_BUFFER* reparse_data = (REPARSE_DATA_BUFFER*)buffer;
+    DWORD bytes_returned;
+    
+    if (!DeviceIoControl(
+        file_handle,
+        FSCTL_GET_REPARSE_POINT,
+        NULL,
+        0,
+        buffer,
+        sizeof(buffer),
+        &bytes_returned,
+        NULL
+    )) {
+        CloseHandle(file_handle);
+        return 0;
+    }
+    
+    CloseHandle(file_handle);
+    
+    WCHAR* w_target = nullptr;
+    DWORD w_target_len = 0;
+    
+    // 根据重解析点类型提取目标路径
+    if (reparse_data->ReparseTag == IO_REPARSE_TAG_SYMLINK) {
+        // 真正的符号链接
+        w_target = reparse_data->SymbolicLinkReparseBuffer.PathBuffer +
+            (reparse_data->SymbolicLinkReparseBuffer.SubstituteNameOffset / sizeof(WCHAR));
+        w_target_len = reparse_data->SymbolicLinkReparseBuffer.SubstituteNameLength / sizeof(WCHAR);
+        
+        // 处理 \??\ 前缀（与 Node.js 保持一致）
+        if (w_target_len >= 4 &&
+            w_target[0] == L'\\' &&
+            w_target[1] == L'?' &&
+            w_target[2] == L'?' &&
+            w_target[3] == L'\\') {
+            
+            if (w_target_len >= 6 &&
+                ((w_target[4] >= L'A' && w_target[4] <= L'Z') ||
+                 (w_target[4] >= L'a' && w_target[4] <= L'z')) &&
+                w_target[5] == L':' &&
+                (w_target_len == 6 || w_target[6] == L'\\')) {
+                // \??\<drive>:\ 格式，去掉前4个字符
+                w_target += 4;
+                w_target_len -= 4;
+            } else if (w_target_len >= 8 &&
+                       (w_target[4] == L'U' || w_target[4] == L'u') &&
+                       (w_target[5] == L'N' || w_target[5] == L'n') &&
+                       (w_target[6] == L'C' || w_target[6] == L'c') &&
+                       w_target[7] == L'\\') {
+                // \??\UNC\ 格式，转换为 \\server\share 格式
+                w_target += 6;
+                w_target[0] = L'\\';
+                w_target_len -= 6;
+            }
+        }
+        
+    } else if (reparse_data->ReparseTag == IO_REPARSE_TAG_MOUNT_POINT) {
+        // Junction 点
+        w_target = reparse_data->MountPointReparseBuffer.PathBuffer +
+            (reparse_data->MountPointReparseBuffer.SubstituteNameOffset / sizeof(WCHAR));
+        w_target_len = reparse_data->MountPointReparseBuffer.SubstituteNameLength / sizeof(WCHAR);
+        
+        // 只处理 \??\<drive>:\ 格式的 junction
+        if (w_target_len >= 6 &&
+            w_target[0] == L'\\' &&
+            w_target[1] == L'?' &&
+            w_target[2] == L'?' &&
+            w_target[3] == L'\\' &&
+            ((w_target[4] >= L'A' && w_target[4] <= L'Z') ||
+             (w_target[4] >= L'a' && w_target[4] <= L'z')) &&
+            w_target[5] == L':' &&
+            (w_target_len == 6 || w_target[6] == L'\\')) {
+            // 去掉 \??\ 前缀
+            w_target += 4;
+            w_target_len -= 4;
+        } else {
+            // 不支持的 junction 类型
+            return 0;
+        }
+        
+    } else {
+        // 不支持的重解析点类型
+        return 0;
+    }
+    
+    if (w_target == nullptr || w_target_len == 0) {
+        return 0;
+    }
+    
+    // 转换为 UTF-8 并计算字节长度
+    int utf8_len = WideCharToMultiByte(
+        CP_UTF8,
+        0,
+        w_target,
+        w_target_len,
+        nullptr,
+        0,
+        nullptr,
+        nullptr
+    );
+    
+    if (utf8_len <= 0) {
+        return 0;
+    }
+    
+    // 返回 UTF-8 字节长度（遵循 Node.js 标准）
+    return static_cast<uint64_t>(utf8_len);
 }
 
 } // namespace filesystem

@@ -10,6 +10,8 @@ export interface CalculationOptions {
   ignorePatterns?: string[];
   /** 是否启用硬链接检测 */
   inodeCheck?: boolean;
+  /** 是否包含符号链接大小 */
+  includeLink?: boolean;
 }
 
 /**

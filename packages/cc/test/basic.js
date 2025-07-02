@@ -21,7 +21,7 @@ async function runBasicTests() {
     try {
       const sta = Date.now()
       const tempDir = 'D:\\BeiQiProjects\\BJJL\\bj-jljc-admin\\node_modules';
-      const result = accelerator.calculateFolderSize(tempDir, {inodeCheck: false});
+      const result = accelerator.calculateFolderSize(tempDir);
       
       console.log('📈 Calculation result:', result);
       console.log((Date.now() - sta) / 1000);

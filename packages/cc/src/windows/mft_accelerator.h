@@ -5,7 +5,48 @@
 #ifdef PLATFORM_WINDOWS
 
 #include <Windows.h>
+#include <winioctl.h>  // 添加 winioctl.h 用于重解析点操作
 #include <unordered_set>
+
+// 手动定义重解析点相关结构体（确保兼容性）
+#ifndef REPARSE_DATA_BUFFER_HEADER_SIZE
+typedef struct _REPARSE_DATA_BUFFER {
+    ULONG  ReparseTag;
+    USHORT ReparseDataLength;
+    USHORT Reserved;
+    union {
+        struct {
+            USHORT SubstituteNameOffset;
+            USHORT SubstituteNameLength;
+            USHORT PrintNameOffset;
+            USHORT PrintNameLength;
+            ULONG  Flags;
+            WCHAR  PathBuffer[1];
+        } SymbolicLinkReparseBuffer;
+        struct {
+            USHORT SubstituteNameOffset;
+            USHORT SubstituteNameLength;
+            USHORT PrintNameOffset;
+            USHORT PrintNameLength;
+            WCHAR  PathBuffer[1];
+        } MountPointReparseBuffer;
+        struct {
+            UCHAR DataBuffer[1];
+        } GenericReparseBuffer;
+    };
+} REPARSE_DATA_BUFFER, *PREPARSE_DATA_BUFFER;
+
+#define REPARSE_DATA_BUFFER_HEADER_SIZE 8  // sizeof(ULONG + USHORT + USHORT)
+#endif
+
+// 确保重解析点标签已定义
+#ifndef IO_REPARSE_TAG_SYMLINK
+#define IO_REPARSE_TAG_SYMLINK (0xA000000CL)
+#endif
+
+#ifndef IO_REPARSE_TAG_MOUNT_POINT
+#define IO_REPARSE_TAG_MOUNT_POINT (0xA0000003L)
+#endif
 
 namespace brisk {
 namespace filesystem {
@@ -66,13 +107,20 @@ private:
      */
     bool shouldIgnoreFile(const std::string& filename, const CalculationOptions& options);
     
-    /**
+        /**
      * 获取文件的唯一标识符（用于硬链接检测）
      * @param path 文件路径
      * @return 文件唯一ID，失败时返回空字符串
      */
     std::string getFileInodeId(const std::string& path);
-};
+    
+    /**
+     * 使用 CreateFileW 获取符号链接大小
+     * @param path 符号链接路径
+     * @return 符号链接大小（字节），Unicode API 支持更好
+     */
+    uint64_t getSymlinkSize(const std::string& path);
+  };
 
 } // namespace filesystem
 } // namespace brisk
