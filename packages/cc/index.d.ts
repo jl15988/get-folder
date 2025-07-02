@@ -4,14 +4,12 @@
 export interface CalculationOptions {
   /** 是否包含隐藏文件 */
   includeHidden?: boolean;
-  /** 是否跟随符号链接 */
-  followSymlinks?: boolean;
   /** 最大深度 */
   maxDepth?: number;
-  /** 最大线程数（0为自动） */
-  maxThreads?: number;
   /** 忽略模式列表 */
   ignorePatterns?: string[];
+  /** 是否启用硬链接检测 */
+  inodeCheck?: boolean;
 }
 
 /**
@@ -24,10 +22,8 @@ export interface CalculationResult {
   fileCount: number;
   /** 目录数量 */
   directoryCount: number;
-  /** 错误列表 */
-  errors: string[];
-  /** 耗时（毫秒） */
-  durationMs: number;
+  /** 链接数量 */
+  linkCount: number;
 }
 
 /**
@@ -90,10 +86,9 @@ export declare class NativeAccelerator {
 
   /**
    * 初始化加速器
-   * @param volumePath Windows 卷路径（如 "C:"）
    * @returns 是否成功初始化
    */
-  initialize(volumePath?: string): boolean;
+  initialize(): boolean;
 
   /**
    * 计算文件夹大小
@@ -146,16 +141,15 @@ export declare function isNativeAccelerationSupported(): boolean;
 
 /**
  * 创建并初始化加速器实例
- * @param volumePath Windows 卷路径
  * @returns 加速器实例
  */
-export declare function createAccelerator(volumePath?: string): NativeAccelerator;
+export declare function createAccelerator(): NativeAccelerator;
 
 /**
  * 原生绑定对象（用于高级用例）
  */
 export declare const nativeBinding: {
-  initializeAccelerator(volumePath?: string): boolean;
+  initializeAccelerator(): boolean;
   calculateFolderSize(path: string, options: CalculationOptions): any;
   buildDirectoryTree(path: string, options: CalculationOptions): any;
   pathExists(path: string): boolean;

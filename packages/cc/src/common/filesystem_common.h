@@ -67,11 +67,10 @@ struct CalculationResult {
     uint64_t total_size;                    // 总大小
     uint32_t file_count;                    // 文件数量
     uint32_t directory_count;               // 目录数量
-    std::vector<std::string> errors;        // 错误列表
-    uint64_t duration_ms;                   // 耗时（毫秒）
+    uint32_t link_count;                    // 链接数量
     
     CalculationResult() : total_size(0), file_count(0), 
-                         directory_count(0), duration_ms(0) {}
+                         directory_count(0), link_count(0) {}
 };
 
 /**
@@ -79,13 +78,11 @@ struct CalculationResult {
  */
 struct CalculationOptions {
     bool include_hidden;                    // 是否包含隐藏文件
-    bool follow_symlinks;                   // 是否跟随符号链接
     uint32_t max_depth;                     // 最大深度
-    uint32_t max_threads;                   // 最大线程数
     std::vector<std::string> ignore_patterns; // 忽略模式
+    bool inode_check;                       // 是否启用硬链接检测
     
-    CalculationOptions() : include_hidden(false), follow_symlinks(false),
-                          max_depth(UINT32_MAX), max_threads(0) {}
+    CalculationOptions() : include_hidden(true), max_depth(UINT32_MAX), inode_check(true) {}
 };
 
 /**

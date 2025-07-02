@@ -19,16 +19,7 @@ using namespace brisk::filesystem;
  */
 static std::unique_ptr<FilesystemAccelerator> g_accelerator;
 
-/**
- * 将 C++ 字符串向量转换为 Napi 数组
- */
-Napi::Array stringVectorToNapiArray(const Napi::Env& env, const std::vector<std::string>& vec) {
-    Napi::Array array = Napi::Array::New(env, vec.size());
-    for (size_t i = 0; i < vec.size(); ++i) {
-        array[i] = Napi::String::New(env, vec[i]);
-    }
-    return array;
-}
+
 
 /**
  * 将 Napi 数组转换为 C++ 字符串向量
@@ -53,20 +44,16 @@ CalculationOptions parseCalculationOptions(const Napi::Object& obj) {
         options.include_hidden = obj.Get("includeHidden").As<Napi::Boolean>().Value();
     }
     
-    if (obj.Has("followSymlinks") && obj.Get("followSymlinks").IsBoolean()) {
-        options.follow_symlinks = obj.Get("followSymlinks").As<Napi::Boolean>().Value();
-    }
-    
     if (obj.Has("maxDepth") && obj.Get("maxDepth").IsNumber()) {
         options.max_depth = obj.Get("maxDepth").As<Napi::Number>().Uint32Value();
     }
     
-    if (obj.Has("maxThreads") && obj.Get("maxThreads").IsNumber()) {
-        options.max_threads = obj.Get("maxThreads").As<Napi::Number>().Uint32Value();
-    }
-    
     if (obj.Has("ignorePatterns") && obj.Get("ignorePatterns").IsArray()) {
         options.ignore_patterns = napiArrayToStringVector(obj.Get("ignorePatterns").As<Napi::Array>());
+    }
+    
+    if (obj.Has("inodeCheck") && obj.Get("inodeCheck").IsBoolean()) {
+        options.inode_check = obj.Get("inodeCheck").As<Napi::Boolean>().Value();
     }
     
     return options;
@@ -81,8 +68,7 @@ Napi::Object calculationResultToNapiObject(const Napi::Env& env, const Calculati
     obj.Set("totalSize", Napi::BigInt::New(env, result.total_size));
     obj.Set("fileCount", Napi::Number::New(env, result.file_count));
     obj.Set("directoryCount", Napi::Number::New(env, result.directory_count));
-    obj.Set("errors", stringVectorToNapiArray(env, result.errors));
-    obj.Set("durationMs", Napi::Number::New(env, result.duration_ms));
+    obj.Set("linkCount", Napi::Number::New(env, result.link_count));
     
     return obj;
 }
@@ -146,18 +132,8 @@ Napi::Value InitializeAccelerator(const Napi::CallbackInfo& info) {
     
     try {
 #ifdef PLATFORM_WINDOWS
-        std::string volume_path = "C:";  // 默认使用 C 盘
-        if (info.Length() > 0 && info[0].IsString()) {
-            volume_path = info[0].As<Napi::String>().Utf8Value();
-        }
-        
-        auto accelerator = std::make_unique<WindowsMftAccelerator>();
-        if (accelerator->initialize(volume_path)) {
-            g_accelerator = std::move(accelerator);
-            return Napi::Boolean::New(env, true);
-        } else {
-            return Napi::Boolean::New(env, false);
-        }
+        g_accelerator = std::make_unique<WindowsAccelerator>();
+        return Napi::Boolean::New(env, true);
 #elif defined(PLATFORM_LINUX)
         g_accelerator = std::make_unique<LinuxSyscallAccelerator>();
         return Napi::Boolean::New(env, true);

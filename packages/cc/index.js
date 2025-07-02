@@ -15,12 +15,11 @@ class NativeAccelerator {
 
   /**
    * 初始化加速器
-   * @param {string} [volumePath] Windows 卷路径（如 "C:"）
    * @returns {boolean} 是否成功初始化
    */
-  initialize(volumePath) {
+  initialize() {
     try {
-      this.initialized = nativeBinding.initializeAccelerator(volumePath);
+      this.initialized = nativeBinding.initializeAccelerator();
       return this.initialized;
     } catch (error) {
       throw new Error(`Failed to initialize native accelerator: ${error.message}`);
@@ -31,11 +30,10 @@ class NativeAccelerator {
    * 计算文件夹大小
    * @param {string} path 文件夹路径
    * @param {Object} [options] 配置选项
-   * @param {boolean} [options.includeHidden=false] 是否包含隐藏文件
-   * @param {boolean} [options.followSymlinks=false] 是否跟随符号链接
+   * @param {boolean} [options.includeHidden=true] 是否包含隐藏文件
    * @param {number} [options.maxDepth=Infinity] 最大深度
-   * @param {number} [options.maxThreads=0] 最大线程数（0为自动）
    * @param {string[]} [options.ignorePatterns=[]] 忽略模式
+   * @param {boolean} [options.inodeCheck=false] 是否启用硬链接检测，关闭将大幅度提升效率
    * @returns {Object} 计算结果
    */
   calculateFolderSize(path, options = {}) {
@@ -45,11 +43,10 @@ class NativeAccelerator {
 
     // 设置默认选项
     const defaultOptions = {
-      includeHidden: false,
-      followSymlinks: false,
+      includeHidden: true,
       maxDepth: 4294967295, // UINT32_MAX
-      maxThreads: 0,
-      ignorePatterns: []
+      ignorePatterns: [],
+      inodeCheck: false
     };
 
     const mergedOptions = { ...defaultOptions, ...options };
@@ -193,32 +190,23 @@ function isNativeAccelerationSupported() {
 
 /**
  * 创建并初始化加速器实例
- * @param {string} [volumePath] Windows 卷路径
  * @returns {NativeAccelerator} 加速器实例
  */
-function createAccelerator(volumePath) {
+function createAccelerator() {
   const accelerator = new NativeAccelerator();
   
   try {
-    if (accelerator.initialize(volumePath)) {
+    if (accelerator.initialize()) {
       return accelerator;
     } else {
       const platform = getPlatform();
-      if (platform === 'windows') {
-        throw new Error('Failed to initialize Windows MFT accelerator. Administrator privileges may be required to access the Master File Table (MFT). Please run as administrator or use the pure JavaScript implementation.');
-      } else {
-        throw new Error(`Failed to initialize ${platform} accelerator. Please check system permissions.`);
-      }
+      throw new Error(`Failed to initialize ${platform} accelerator. Please check system permissions.`);
     }
   } catch (error) {
     // Re-throw with platform-specific guidance
     if (error.message.includes('Failed to initialize native accelerator')) {
       const platform = getPlatform();
-      if (platform === 'windows') {
-        throw new Error('Failed to initialize Windows MFT accelerator. Administrator privileges may be required to access the Master File Table (MFT). Please run as administrator or use the pure JavaScript implementation.');
-      } else {
-        throw new Error(`Failed to initialize ${platform} accelerator: ${error.message}`);
-      }
+      throw new Error(`Failed to initialize ${platform} accelerator: ${error.message}`);
     }
     throw error;
   }
