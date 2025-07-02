@@ -42,6 +42,10 @@ export interface FolderSizeOptions {
    */
   includeHidden?: boolean;
   /**
+   * 是否包含符号连接文件，如果开启，统计结果一般比系统统计稍微大一点
+   */
+  includeLink?: boolean;
+  /**
    *  并发限制
    */
   concurrency?: number;
@@ -50,7 +54,7 @@ export interface FolderSizeOptions {
    */
   ignoreErrors?: boolean;
   /**
-   * 是否硬链接检测
+   * 是否硬链接检测，如果开启，统计结果一般比系统统计略小
    */
   inodeCheck?: boolean;
   /**

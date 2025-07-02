@@ -39,6 +39,7 @@ export class FolderSize {
       maxDepth: Number.MAX_SAFE_INTEGER,
       ignores: [],
       includeHidden: true,
+      includeLink: true,
       concurrency: 20,
       ignoreErrors: false,
       inodeCheck: true,
@@ -105,11 +106,14 @@ export class FolderSize {
         this.processedInodes.add(inodeKey);
       }
 
-      // 累加文件大小
-      totalSize = totalSize.plus(stats.size.toString());
-
-      if (stats.isSymbolicLink()) {
+      const symbolicLink = stats.isSymbolicLink();
+      if (symbolicLink) {
         linkCount++;
+        if (this.options.includeLink) {
+          totalSize = totalSize.plus(stats.size.toString());
+        }
+      } else {
+        totalSize = totalSize.plus(stats.size.toString());
       }
 
       if (stats.isDirectory()) {
