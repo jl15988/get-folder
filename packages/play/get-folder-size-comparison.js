@@ -23,9 +23,7 @@ async function runSimpleComparison() {
   const ourStartMem = process.memoryUsage().heapUsed;
 
   try {
-    const ourResult = await FolderSize.getSize(TEST_PATH, {
-      followSymlinks: false
-    })
+    const ourResult = await FolderSize.getSize(TEST_PATH)
     const ourEndTime = Date.now();
     const ourEndMem = process.memoryUsage().heapUsed;
 

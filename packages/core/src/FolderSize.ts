@@ -40,7 +40,7 @@ export class FolderSize {
       ignores: [],
       includeHidden: true,
       includeLink: true,
-      concurrency: 20,
+      concurrency: 2,
       ignoreErrors: false,
       inodeCheck: true,
       // 默认继续
@@ -106,17 +106,21 @@ export class FolderSize {
         this.processedInodes.add(inodeKey);
       }
 
-      const symbolicLink = stats.isSymbolicLink();
-      if (symbolicLink) {
+      const isSymbolicLink = stats.isSymbolicLink();
+      const isDirectory = stats.isDirectory();
+      const isFile = stats.isFile();
+      const fileSize = stats.size;
+
+      if (isSymbolicLink) {
         linkCount++;
         if (this.options.includeLink) {
-          totalSize = totalSize.plus(stats.size.toString());
+          totalSize = totalSize.plus(fileSize.toString());
         }
       } else {
-        totalSize = totalSize.plus(stats.size.toString());
+        totalSize = totalSize.plus(fileSize.toString());
       }
 
-      if (stats.isDirectory()) {
+      if (isDirectory) {
         if (itemPath !== folderPath) {
           // 排除当前文件夹
           directoryCount++;
@@ -144,7 +148,7 @@ export class FolderSize {
           }
         }));
 
-      } else if (stats.isFile()) {
+      } else if (isFile) {
         fileCount++;
       }
     };
