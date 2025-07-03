@@ -4,8 +4,11 @@
   "scripts": {
     "test:cc": "node ./basic.js",
     "test:fds": "node ./folder-size.js",
-    "test:compare": "node ./get-folder-size-comparison.js",
-    "test:compare:gc": "node --expose-gc ./get-folder-size-comparison.js"
+    "test:tree": "node ./directory-tree.js",
+    "demo:tree": "node ./directory-tree-demo.js",
+    "test:compare": "node --expose-gc ./get-folder-size-comparison.js",
+    "benchmark": "node ./benchmark-comparison.js",
+    "benchmark:detailed": "node ./benchmark-detailed.js"
   },
   "author": "jl15988",
   "license": "MIT",
@@ -14,6 +17,7 @@
     "get-folder": "workspace:*"
   },
   "devDependencies": {
-    "@types/node": "^20.0.0"
+    "@types/node": "^20.0.0",
+    "benchmark": "^2.1.4"
   }
 }

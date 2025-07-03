@@ -46,6 +46,7 @@ async function runSimpleComparison() {
   // 强制垃圾回收
   if (global.gc) {
     global.gc();
+    await new Promise(resolve => setTimeout(resolve, 1000));
   }
 
   // 测试 get-folder-size
