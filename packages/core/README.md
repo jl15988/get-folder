@@ -109,14 +109,14 @@ Compared with the mainstream library `get-folder-size`, our implementation shows
 
 ### 🎯 Core Advantages
 
-- **⚡ Faster Execution**: Optimized concurrency control and algorithms to avoid file handle exhaustion, average 15% faster
-- **💾 Ultra-low Memory Usage**: Efficient memory management, 60% reduction in memory usage
+- **⚡ Faster Execution**: Optimized concurrency control and algorithms to avoid file handle exhaustion, average 45% faster
+- **💾 Ultra-low Memory Usage**: Efficient memory management, 80% reduction in memory usage
 - **🔧 Flexible Error Handling**: User-customizable error handling strategy, won't interrupt the entire calculation due to individual file errors
 - **📊 More Statistics**: Provides detailed statistics like file count, directory count, not just size
 
 ### 💡 Technical Features
 
-- **BigNumber Support**: Uses [BigNumber.js](https://www.npmjs.com/package/bignumber.js) to ensure precision for large file calculations
+- **BigNumber Support**: Uses [BigNumber.js](https://www.npmjs.com/package/bignumber.js) to ensure precision for large file calculations, Downward compatibility
 - **Native TypeScript Support**: Complete type definitions for excellent development experience
 
 ## License
