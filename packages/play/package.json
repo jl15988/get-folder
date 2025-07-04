@@ -4,8 +4,6 @@
   "scripts": {
     "test:cc": "node ./basic.js",
     "test:fds": "node ./folder-size.js",
-    "test:tree": "node ./directory-tree.js",
-    "demo:tree": "node ./directory-tree-demo.js",
     "test:compare": "node --expose-gc ./get-folder-size-comparison.js",
     "benchmark": "node ./benchmark-comparison.js",
     "benchmark:detailed": "node ./benchmark-detailed.js"

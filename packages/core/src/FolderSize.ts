@@ -4,13 +4,13 @@ import {FolderSizeError, FolderSizeOptions, FolderSizeResult} from './types';
 import {BigNumber} from "bignumber.js";
 import * as path from "node:path";
 import {SimpleSemaphore} from "./SimpleSemaphore";
+import {BaseScene} from "./BaseScene";
 
 /**
  * 文件夹大小计算器类
  */
-export class FolderSize {
+export class FolderSize extends BaseScene {
   private readonly options: Required<FolderSizeOptions>;
-  private readonly processedInodes = new Set<string>();
 
   /**
    * 快捷获取文件夹大小
@@ -35,6 +35,7 @@ export class FolderSize {
    * @param options 大小计算选项
    */
   constructor(options: FolderSizeOptions = {}) {
+    super();
     this.options = {
       maxDepth: Number.MAX_SAFE_INTEGER,
       ignores: [],
@@ -55,7 +56,7 @@ export class FolderSize {
    * @returns 文件夹大小结果 Promise
    */
   async size(folderPath: string): Promise<FolderSizeResult> {
-    this.processedInodes.clear();
+    this.clearInode();
     const normalizePath = path.normalize(folderPath);
 
     // 使用 Node.js 实现
@@ -85,7 +86,7 @@ export class FolderSize {
       }
 
       // 检查是否应该忽略此路径
-      if (this.shouldIgnorePath(itemPath)) {
+      if (this.shouldIgnorePath(this.options.ignores, itemPath, this.options.includeHidden)) {
         return;
       }
 
@@ -98,12 +99,7 @@ export class FolderSize {
       }
 
       if (this.options.inodeCheck) {
-        // 检查是否已处理过此 inode（避免硬链接重复计算）
-        const inodeKey = `${stats.dev}-${stats.ino}`;
-        if (this.processedInodes.has(inodeKey)) {
-          return;
-        }
-        this.processedInodes.add(inodeKey);
+        if (this.checkInode(stats)) return;
       }
 
       const isSymbolicLink = stats.isSymbolicLink();
@@ -183,21 +179,5 @@ export class FolderSize {
     else if (!this.options.ignoreErrors) {
       throw new Error(message);
     }
-  }
-
-  /**
-   * 检查是否应该忽略指定路径
-   * @param itemPath 项目路径
-   * @returns 是否应该忽略
-   */
-  private shouldIgnorePath(itemPath: string): boolean {
-    const name = path.basename(itemPath);
-    // 检查隐藏文件
-    if (!this.options.includeHidden && name.startsWith('.')) {
-      return true;
-    }
-
-    // 检查忽略模式
-    return this.options.ignores.some(pattern => pattern.test(itemPath));
   }
 }

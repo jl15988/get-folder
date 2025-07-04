@@ -30,35 +30,43 @@ export type ErrorCallback = (error: FolderSizeError) => boolean;
  */
 export interface FolderSizeOptions {
   /**
-   * 最大深度限制
+   * 最大深度限制，默：Number.MAX_SAFE_INTEGER
    */
   maxDepth?: number;
   /**
-   * 忽略的文件/目录模式
+   * 忽略的文件/目录模式，默认：[]
    */
   ignores?: RegExp[];
   /**
-   * 是否包含隐藏文件
+   * 是否包含隐藏文件，默认：true
+   *
+   * 简单的隐藏文件判断逻辑（文件名开头为'.'）
    */
   includeHidden?: boolean;
   /**
-   * 是否包含符号连接文件，如果开启，统计结果一般比系统统计稍微大一点
+   * 是否包含符号连接文件，默认：true
+   *
+   * 如果开启，统计结果一般比系统统计稍微大一点
    */
   includeLink?: boolean;
   /**
-   *  并发限制
+   * 并发限制，默认：2
+   *
+   * 适当调整能够提升统计效率，注意：并非越大越好
    */
   concurrency?: number;
   /**
-   * 是否忽略错误继续计算
+   * 是否忽略错误继续计算，默认：false
    */
   ignoreErrors?: boolean;
   /**
-   * 是否硬链接检测，如果开启，统计结果一般比系统统计略小
+   * 是否硬链接检测，默认：true
+   *
+   * 如果开启，统计结果一般比系统统计略小
    */
   inodeCheck?: boolean;
   /**
-   * 错误处理回调
+   * 错误处理回调，默认：() => true
    */
   onError?: ErrorCallback;
 }
