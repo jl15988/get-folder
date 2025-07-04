@@ -4,6 +4,9 @@
   "scripts": {
     "test:cc": "node ./basic.js",
     "test:fds": "node ./folder-size.js",
+    "test:fdt": "node ./folder-tree.js",
+    "test:lyt": "node ./lazy-tree.js",
+    "test:tf": "node ./tree-formatter.js",
     "test:compare": "node --expose-gc ./get-folder-size-comparison.js",
     "benchmark": "node ./benchmark-comparison.js",
     "benchmark:detailed": "node ./benchmark-detailed.js"

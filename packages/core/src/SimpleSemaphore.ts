@@ -85,4 +85,60 @@ export class SimpleSemaphore {
       this.available++;
     }
   }
+
+  /**
+   * 并发映射处理静态方法
+   *
+   * 类似于 Promise.all(array.map(fn))，但具有并发数量控制
+   *
+   * @param items 待处理的数组项目
+   * @param concurrency 最大并发数量
+   * @param processor 处理函数，接收数组项目，返回处理结果的Promise
+   * @param errorHandler 错误处理策略，'ignore' = 忽略错误返回null，'throw' = 抛出错误，默认 'ignore'
+   * @returns Promise<T[]> 处理结果数组，忽略错误时可能包含null值
+   */
+  static async concurrentMap<T, R>(
+    items: T[],
+    concurrency: number,
+    processor: (item: T) => Promise<R>,
+    errorHandler: 'ignore' | 'throw' = 'ignore'
+  ): Promise<(R | null)[]> {
+    const semaphore = new SimpleSemaphore(concurrency);
+
+    const promises = items.map(async (item) => {
+      await semaphore.acquire();
+      try {
+        return await processor(item);
+      } catch (error) {
+        if (errorHandler === 'throw') {
+          throw error;
+        }
+        // errorHandler === 'ignore'，返回null
+        return null;
+      } finally {
+        semaphore.release();
+      }
+    });
+
+    return await Promise.all(promises);
+  }
+
+  /**
+   * 并发映射处理静态方法（过滤null值版本）
+   *
+   * 与 concurrentMap 相同，但会自动过滤掉null/undefined结果
+   *
+   * @param items 待处理的数组项目
+   * @param concurrency 最大并发数量
+   * @param processor 处理函数，接收数组项目，返回处理结果的Promise
+   * @returns Promise<R[]> 处理结果数组，已过滤null/undefined值
+   */
+  static async concurrentMapFiltered<T, R>(
+    items: T[],
+    concurrency: number,
+    processor: (item: T) => Promise<R | null | undefined>
+  ): Promise<R[]> {
+    const results = await SimpleSemaphore.concurrentMap(items, concurrency, processor, 'ignore');
+    return results.filter((result): result is R => result != null);
+  }
 }
