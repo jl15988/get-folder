@@ -80,11 +80,6 @@ export class FolderSize extends BaseScene {
      * @param depth 当前深度
      */
     const processItem = async (itemPath: string, depth: number = 0): Promise<void> => {
-      // 检查深度限制
-      if (depth > this.options.maxDepth) {
-        return;
-      }
-
       // 检查是否应该忽略此路径
       if (this.shouldIgnorePath(this.options.ignores, itemPath, this.options.includeHidden)) {
         return;
@@ -117,6 +112,11 @@ export class FolderSize extends BaseScene {
       }
 
       if (isDirectory) {
+        // 检查文件夹深度限制，只在递归进入子目录前检查
+        if (depth > this.options.maxDepth) {
+          return;
+        }
+
         if (itemPath !== folderPath) {
           // 排除当前文件夹
           directoryCount++;
@@ -138,7 +138,7 @@ export class FolderSize extends BaseScene {
             const childPath = join(itemPath, entry);
             await processItem(childPath, depth + 1);
           } catch (error) {
-            // 子项目错误不影响其他项目
+            throw error;
           } finally {
             semaphore.release();
           }
@@ -175,8 +175,7 @@ export class FolderSize extends BaseScene {
         throw new Error(`计算被用户停止: ${message}`);
       }
     }
-    // 否则根据 ignoreErrors 设置决定是否继续
-    else if (!this.options.ignoreErrors) {
+    if (!this.options.ignoreErrors) {
       throw new Error(message);
     }
   }

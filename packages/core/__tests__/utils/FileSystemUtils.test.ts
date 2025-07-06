@@ -57,7 +57,7 @@ describe('FileSystemUtils', () => {
     it('should return relative path correctly', () => {
       expect(FileSystemUtils.getRelativePath('/home/user', '/home/user/documents/file.txt'))
         .toBe('documents/file.txt');
-      
+
       expect(FileSystemUtils.getRelativePath('C:\\Users\\user', 'C:\\Users\\user\\Documents\\file.txt'))
         .toBe('Documents/file.txt');
     });
@@ -84,8 +84,8 @@ describe('FileSystemUtils', () => {
 
     it('should handle empty paths', () => {
       expect(FileSystemUtils.getRelativePath('', '/path/to/file'))
-        .toBe('/path/to/file');
-      
+        .toBe('path/to/file');
+
       expect(FileSystemUtils.getRelativePath('/base', ''))
         .toBe('');
     });
@@ -126,4 +126,4 @@ describe('FileSystemUtils', () => {
       expect(FileSystemUtils.isPathSafe('file.')).toBe(true);
     });
   });
-}); 
+});

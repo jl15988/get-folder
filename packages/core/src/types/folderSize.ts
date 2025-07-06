@@ -30,7 +30,7 @@ export type ErrorCallback = (error: FolderSizeError) => boolean;
  */
 export interface FolderSizeOptions {
   /**
-   * 最大深度限制，默：Number.MAX_SAFE_INTEGER
+   * 文件夹最大深度限制，默：Number.MAX_SAFE_INTEGER
    */
   maxDepth?: number;
   /**
