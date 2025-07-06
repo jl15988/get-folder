@@ -4,22 +4,10 @@
 
 A modern Node.js file system analysis library designed for high-performance folder size calculation. Supports both JavaScript and TypeScript, providing a clean API and powerful customization options.
 
-## ✨ Core Features
-
-- **🚄 High Performance**: 45% faster than mainstream libraries on average, 40% less memory usage
-- **🎯 Precise Calculation**: Uses BigNumber to ensure calculation accuracy for large files, supports TB-level file systems
-- **🔧 Flexible Configuration**: Rich configuration options supporting depth limits, pattern ignoring, error handling, etc.
-- **💪 Robustness**: Comprehensive error handling mechanism that won't interrupt calculations due to individual file errors
-- **📊 Detailed Statistics**: Provides detailed information including file count, directory count, symbolic link count, etc.
-
 ## 📦 Installation
 
 ```bash
-# Using npm
 npm install get-folder
-
-# Using yarn
-yarn add get-folder
 ```
 
 ## 🚀 Quick Start
@@ -69,73 +57,6 @@ const result = await FolderSize.getSize('./my-folder', {
 });
 ```
 
-## 📚 Use Cases
-
-### 1. Project Directory Analysis
-
-```typescript
-// Analyze project size, excluding build artifacts
-const projectSize = await FolderSize.getSize('./my-project', {
-  ignores: [
-    /node_modules/,
-    /\.git/,
-    /dist/,
-    /build/,
-    /coverage/,
-    /\.next/,
-    /\.nuxt/
-  ]
-});
-
-console.log(`Source code size: ${FileSystemUtils.formatFileSize(projectSize.size)}`);
-```
-
-### 2. System Cleanup Tool
-
-```typescript
-// Find large folders for cleanup
-const directories = ['./Downloads', './Documents', './Desktop'];
-
-for (const dir of directories) {
-  try {
-    const result = await FolderSize.getSize(dir, {
-      ignoreErrors: true,
-      maxDepth: 2 // Limit depth for better performance
-    });
-    
-    if (result.size.isGreaterThan(1024 * 1024 * 1024)) { // > 1GB
-      console.log(`🔍 Large folder found: ${dir} - ${FileSystemUtils.formatFileSize(result.size)}`);
-    }
-  } catch (error) {
-    console.log(`❌ Cannot access: ${dir}`);
-  }
-}
-```
-
-### 3. Disk Usage Monitoring
-
-```typescript
-// Monitor growth of specific directories
-async function monitorDiskUsage(path: string) {
-  const result = await FolderSize.getSize(path, {
-    ignoreErrors: true,
-    concurrency: 2
-  });
-  
-  return {
-    path,
-    size: result.size.toString(),
-    formattedSize: FileSystemUtils.formatFileSize(result.size),
-    fileCount: result.fileCount,
-    timestamp: new Date().toISOString()
-  };
-}
-
-// Usage example
-const usage = await monitorDiskUsage('/var/log');
-console.log('Disk usage:', usage);
-```
-
 ## 🔧 API Reference
 
 ### FolderSize.getSize(folderPath, options?)
@@ -151,14 +72,14 @@ Core method for calculating folder size.
 
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
-| `maxDepth` | number | `Infinity` | Maximum traversal depth to limit recursion levels |
+| `maxDepth` | number | `Infinity` | Maximum traversal depth to limit directory levels |
 | `ignores` | RegExp[] | `[]` | Array of file/directory patterns to ignore |
-| `includeHidden` | boolean | `true` | Whether to include hidden files (starting with .) |
-| `includeLink` | boolean | `true` | Whether to include symbolic link files |
-| `concurrency` | number | `2` | Number of concurrent operations, recommended value is 2 |
+| `includeHidden` | boolean | `true` | Whether to include hidden files (simple hidden file detection, files starting with .) |
+| `includeLink` | boolean | `true` | Whether to include symbolic link files (shortcuts) |
+| `concurrency` | number | `2` | Number of concurrent operations, recommended value is 2 (appropriate adjustment can improve efficiency, not necessarily bigger is better) |
 | `ignoreErrors` | boolean | `false` | Whether to ignore errors and continue calculation |
 | `inodeCheck` | boolean | `true` | Whether to check inodes to avoid duplicate counting of hard links |
-| `onError` | function | `() => true` | Error handling callback function |
+| `onError` | function | `() => true` | Error handling callback function, returns true to ignore errors and continue execution (affected by ignoreErrors configuration), otherwise throws exception |
 
 #### Return Value
 
@@ -166,42 +87,34 @@ Returns a Promise that resolves to `FolderSizeResult`:
 
 ```typescript
 interface FolderSizeResult {
-  size: BigNumber;      // Total size in bytes
-  fileCount: number;    // Number of files
-  directoryCount: number; // Number of directories
-  linkCount: number;    // Number of symbolic links
+  // Total size in bytes
+  size: BigNumber;
+  // Number of files
+  fileCount: number;
+  // Number of directories
+  directoryCount: number;
+  // Number of symbolic links
+  linkCount: number;
 }
 ```
 
 ## 🚀 Performance Advantages
 
-Through performance comparison testing with the mainstream library `get-folder-size`, our implementation shows significant advantages:
-
-### 📊 Benchmark Comparison Results
-
 **Test Environment**: node_modules directory (46,750 files, 8,889 directories, total size 899MB)
 
-| Metric | Performance Improvement                |
-|--------|---------------------------------------|
-| **Overall Performance** | **🚀 100% improvement**             |
+**Comparison Target**: get-folder-size
+
+**Comparison Results**:
+
+| Metric | Performance Improvement |
+|--------|------------------------|
+| **Overall Performance** | **🚀 100% improvement** |
 | **Execution Time** | **🚀 Average 45% faster**, fastest at only 2.1s |
 | **Memory Usage** | **💾 Average 40% savings**, minimum 11MB usage |
-| **Result Accuracy** | **📏 Completely consistent**         |
+| **Result Accuracy** | **📏 Completely consistent** |
 
 *Performance data is from developer local testing, actual performance may vary by system*
 
-### 🎯 Core Advantages
-
-- **⚡ Faster Execution Speed**: Optimized concurrency control and algorithms, avoiding file handle exhaustion, average 45% faster
-- **💾 Ultra-low Memory Usage**: Efficient memory management, 80% reduction in memory usage
-- **🔧 Flexible Error Handling**: User-customizable error handling strategy, won't interrupt entire calculation due to individual file errors
-- **📊 More Statistical Information**: Provides detailed statistics like file count, directory count, not just size
-
-### 💡 Technical Features
-
-- **BigNumber Support**: Uses [BigNumber.js](https://www.npmjs.com/package/bignumber.js) to ensure calculation accuracy for large files, backward compatible
-- **Native TypeScript Support**: Complete type definitions providing excellent development experience
-
 ## 📄 License
 
-MIT License - See [LICENSE](LICENSE) file for details.
+MIT License - see [LICENSE](LICENSE) file for details.

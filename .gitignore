@@ -43,3 +43,6 @@ templates/test-project/node_modules/
 *.sublime-project
 *.sublime-workspace
 .DS_Store
+
+# 测试覆盖范围文件
+coverage
