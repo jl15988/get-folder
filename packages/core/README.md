@@ -113,6 +113,11 @@ interface FolderSizeResult {
 | **Memory Usage** | **💾 Average 40% savings**, minimum 11MB usage |
 | **Result Accuracy** | **📏 Completely consistent** |
 
+**🗂️ Comparison of testing for large directories**
+
+Test 20G directory (including node_comodules directory, including frontend Vue project and backend Java project)
+Get-folder takes 43.6 seconds (closing inodeCheck takes 29.2 seconds), get-folder size takes 77.6 seconds
+
 *Performance data is from developer local testing, actual performance may vary by system*
 
 ## 📄 License

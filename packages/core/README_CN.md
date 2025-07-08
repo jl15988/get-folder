@@ -113,6 +113,11 @@ interface FolderSizeResult {
 | **内存使用** | **💾 平均节省 40%**，最小占用 11MB |
 | **结果准确性** | **📏 完全一致**               |
 
+**🗂️ 大目录测试对比**
+
+测试 20G 目录（包含 node_modules 目录，包含前端 vue 项目与后端 java 项目）
+get-folder 用时 43.6 秒（关闭 inodeCheck 用时 29.2 秒），get-folder-size 用时 77.6 秒
+
 *性能数据来源于开发者本地测试，实际表现可能因系统而异*
 
 ## 📄 许可证
